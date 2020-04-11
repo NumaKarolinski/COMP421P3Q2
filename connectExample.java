@@ -2,10 +2,7 @@ import java.sql.*;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 import java.text.*;
 import java.util.Date;
@@ -13,11 +10,11 @@ import java.util.Random;
 
 public class ConnectExample{
 	
-	public static void main(String args []) throws SQLException{
-
-		boolean continueLoop1 = true;
+	public static void main(String args []) throws SQLException{		
 		
 		Scanner sc = new Scanner(System.in);
+		
+		boolean continueLoop1 = true;
 		
 		System.out.println("Hello, you are trying to access the cs421g37 Hotel Database.");
 		System.out.println("I am your personal assistant. What would you like to do?");
@@ -31,7 +28,7 @@ public class ConnectExample{
 			System.out.println("2) Make a reservation.");
 			System.out.println("3) View employee ids.");
 			System.out.println("4) Browse customer reviews.");
-			System.out.println("5) Procedure ...");
+			System.out.println("5) Search available rooms");
 			System.out.println("6) Quit.");
 			System.out.println("---------------------------");
 				
@@ -42,6 +39,7 @@ public class ConnectExample{
 		        if(sc.hasNextInt()){
 		        	
 		            int userInput = sc.nextInt();
+		            sc.nextLine();
 		            
 		            if((userInput >= 1) && (userInput <= 6)) {
 		            	
@@ -64,7 +62,7 @@ public class ConnectExample{
 					    }
 					    
 					    else if(userInput == 5){
-					    	procedure(sc);
+					    	searchAvailableRooms(sc);
 					    }
 					    
 					    else{
@@ -98,7 +96,7 @@ public class ConnectExample{
 		System.out.println("You have chosen to check in/out a customer.");
 		System.out.println("First, I need your employee id (eid).");
 		System.out.println("If you are not sure, type 'back' to return to the main menu,");
-		System.out.println("and select 3) View Employee ids, to find a list of eids.");
+		System.out.println("and select 3) View employee ids, to find a list of eids.");
 		System.out.println("Note, you must enter a Receptionist eid to check in/out a customer.");
 		System.out.println("Enter your eid below:");
 		
@@ -106,9 +104,9 @@ public class ConnectExample{
 		
 		while(continueLoop3) {
 		
-			if(sc.hasNext()) {
+			if(sc.hasNextLine()) {
 				
-				String userInput = sc.next();
+				String userInput = sc.nextLine();
 				
 				if (userInput.equals("back")) {
 					continueLoop3 = false;
@@ -123,10 +121,20 @@ public class ConnectExample{
 			            userEIDInput = validInt; 
 			            
 						String[] eidEmployee = connectAndExecute("SELECT", "eid Employee", "int");
-						int eidELength = eidEmployee.length;
+						
+						int eidELength = 0;
+						
+			            if (eidEmployee != null) {
+			            	eidELength = eidEmployee.length;
+			            }
 						
 						String[] eidReceptionist = connectAndExecute("SELECT", "eid Receptionist", "int");
-						int eidRLength = eidReceptionist.length;
+						
+						int eidRLength = 0;
+						
+			            if (eidReceptionist != null) {
+			            	eidRLength = eidReceptionist.length;
+			            }
 						
 						boolean eidETruth = false;
 						boolean eidRTruth = false;
@@ -148,16 +156,17 @@ public class ConnectExample{
 							continueLoop3 = false;
 							
 							System.out.println("You entered a valid Receptionist eid.");
-							System.out.println("Now, please enter the customer's phone number,");
-							System.out.println("or type 'back' to return to the main menu:");
+							System.out.println("Now, please enter the customer's phone number,");							
+							System.out.println("or type 'back' to return to the main menu.");
+							System.out.println("Enter it in the format '5201234567'");
 							
 							boolean continueLoop4 = true;
 							
 							while (continueLoop4) {
 								
-								if(sc.hasNext()) {
+								if(sc.hasNextLine()) {
 									
-									userInput = sc.next();
+									userInput = sc.nextLine();
 									
 									if (userInput.equals("back")) {
 										continueLoop4 = false;
@@ -165,14 +174,19 @@ public class ConnectExample{
 									
 									else {
 										
-										int userPNumInput = -1;
+										long userPNumInput = -1;
 										
 										try {
-								            validInt = Integer.parseInt(userInput); 
-								            userPNumInput = validInt; 
+								            long validLong = Long.parseLong(userInput); 
+								            userPNumInput = validLong; 
 								            
-											String[] pNumCustomer = connectAndExecute("SELECT", "phone_number Customer", "int");
-											int pNumCLength = pNumCustomer.length;
+											String[] pNumCustomer = connectAndExecute("SELECT", "phone_number Customer", "long");
+											
+											int pNumCLength = 0;
+											
+								            if (pNumCustomer != null) {
+								            	pNumCLength = pNumCustomer.length;
+								            }
 											
 											boolean pNumCTruth = false;
 											
@@ -193,9 +207,9 @@ public class ConnectExample{
 												
 												while (continueLoop5) {
 													
-													if(sc.hasNext()) {
+													if(sc.hasNextLine()) {
 														
-														userInput = sc.next();
+														userInput = sc.nextLine();
 														
 														if (userInput.equals("back")) {
 															continueLoop5 = false;
@@ -204,31 +218,43 @@ public class ConnectExample{
 														else if(userInput.equals("in")){
 															
 															String[] ridHandle = connectAndExecute("SELECT", "rid Handle phone_number " + String.valueOf(userPNumInput), "int");
-															int ridHLength = ridHandle.length;
+															
+															int ridHLength = 0;
+															
+												            if (ridHandle != null) {
+												            	ridHLength = ridHandle.length;
+												            }
 															
 															if(ridHLength == 0) {
 																
-																System.out.println("There is no Reservation to check-in for this customer.");
+																System.out.println("There is no Reservation to check-in for this customer,");
+																System.out.println("or possibly you need to check-out first.");
 																System.out.println("To make a Reservation, select 2) Handle a Reservation,");
 																System.out.println("in the main menu.");
-																continueLoop5 = false;
+																System.out.println("Would you like to check this customer in or out?");
+																System.out.println("Type 'in', 'out', or 'back' for neither:");
 															}
 															
 															else {
 																
-																String inputString = "room_number Belongs phone_number ";
+																String inputString = "room_number Belongs rid ";
 																
-																for (int i = 0; i < ridHandle.length; i++) {
+																for (int i = 0; i < ridHLength; i++) {
 																	
 																	inputString = inputString + ridHandle[i];
 																	
-																	if (i != (ridHandle.length - 1)) {
+																	if (i != (ridHLength - 1)) {
 																		inputString = inputString + " ";
 																	}
 																}
 																
 																String[] rNumsBelongs = connectAndExecute("SELECT", inputString, "int");
-																int rNumsBLength = rNumsBelongs.length;
+																
+																int rNumsBLength = 0;
+																
+													            if (rNumsBelongs != null) {
+													            	rNumsBLength = rNumsBelongs.length;
+													            }
 																
 																if(rNumsBLength == 0) {
 																	System.out.println("It appears that all rooms have already been checked in by this Customer.");
@@ -252,13 +278,22 @@ public class ConnectExample{
 																		
 																		if (roomsCheckedIn < rNumsBLength){
 																			
-																			System.out.println("Which would room you like to check-in?");
-																			System.out.println("Type one of the room numbers, or type 'done' to");
-																			System.out.println("signify that you would not like to check-in a room:");
+																			if (roomsCheckedIn > 0) {
+																				System.out.println("You still have rooms left to check-in");
+																				System.out.println("Which room would you like to check-in?");
+																				System.out.println("Type one of the room numbers, or type 'done' to");
+																				System.out.println("signify that you would not like to check-in a room:");
+																			}
 																			
-																			if(sc.hasNext()) {
+																			else {
+																				System.out.println("Which room would you like to check-in?");
+																				System.out.println("Type one of the room numbers, or type 'done' to");
+																				 System.out.println("signify that you would not like to check-in a room:");
+																			}
+																			
+																			if(sc.hasNextLine()) {
 																				
-																				userInput = sc.next();
+																				userInput = sc.nextLine();
 																				String roomEntered = userInput;
 																				
 																				boolean validRoom = false;
@@ -274,8 +309,8 @@ public class ConnectExample{
 																				}
 																				
 																				else if(validRoom) {
-																					connectAndExecute("UPDATE", "Room room_status OCC room_number " + roomEntered, null);
-																					connectAndExecute("INSERT", "Check_in_out " + roomEntered + " " + userEIDInput + " " + userPNumInput, null);
+																					connectAndExecute("UPDATE", "Room%room_status = 'OCC'%room_number = " + roomEntered, null);
+																					connectAndExecute("INSERT", "Check_in_out%" + roomEntered + ", " + String.valueOf(userEIDInput) + ", " + userPNumInput, null);
 																					roomsCheckedIn += 1;
 																				}
 																				
@@ -310,12 +345,18 @@ public class ConnectExample{
 														else if(userInput.equals("out")) {
 															
 															String[] rNumCIO = connectAndExecute("SELECT", "room_number Check_in_out phone_number " + String.valueOf(userPNumInput), "int");
-															int rNumCIOLength = rNumCIO.length;
+															
+															int rNumCIOLength = 0;
+															
+												            if (rNumCIO != null) {
+												            	rNumCIOLength = rNumCIO.length;
+												            }
 															
 															if(rNumCIOLength == 0) {
 																
 																System.out.println("It seems that this customer has not checked-in to the hotel.");
-																continueLoop5 = false;
+																System.out.println("Would you like to check this customer in or out?");
+																System.out.println("Type 'in', 'out', or 'back' for neither:");
 															}
 															
 															else {
@@ -335,13 +376,21 @@ public class ConnectExample{
 																	
 																	if (roomsCheckedOut < rNumCIOLength){
 																		
-																		System.out.println("Which would room you like to check-out of?");
-																		System.out.println("Type one of the room numbers, or type 'done' to");
-																		System.out.println("signify that you would not like to check-out of a room:");
+																		if (roomsCheckedOut > 0){
+																			System.out.println("There are still rooms to check-out of.");
+																			System.out.println("Type one of the room numbers, or type 'done' to");
+																			System.out.println("signify that you would not like to check-out of a room:");
+																		}
+																		
+																		else {
+																			System.out.println("Which would room you like to check-out of?");
+																			System.out.println("Type one of the room numbers, or type 'done' to");
+																			System.out.println("signify that you would not like to check-out of a room:");
+																		}
 																		
 																		if(sc.hasNext()) {
 																			
-																			userInput = sc.next();
+																			userInput = sc.nextLine();
 																			String roomEntered = userInput;
 																			
 																			boolean validRoom = false;
@@ -358,8 +407,8 @@ public class ConnectExample{
 																			
 																			else if(validRoom) {
 																				
-																				connectAndExecute("UPDATE", "Room room_status V room_number " + roomEntered, null);
-																				connectAndExecute("DELETE", "Check_in_out room_number" + roomEntered, null);
+																				connectAndExecute("UPDATE", "Room%room_status = 'V'%room_number = " + roomEntered, null);
+																				connectAndExecute("DELETE", "Check_in_out%room_number = " + roomEntered, null);
 																				
 																				String[] ridBelongs = connectAndExecute("SELECT", "rid Belongs room_number " + roomEntered, "int");
 																				
@@ -371,11 +420,17 @@ public class ConnectExample{
 																				while(!foundReservation) {
 																					
 																					String realInputString = inputString + ridBelongs[ridBelongsCounter];
-																					String[] pNumHandle = connectAndExecute("SELECT", realInputString, "int");
+																					String[] pNumHandle = connectAndExecute("SELECT", realInputString, "long");
+																					
+																					int pNumHLength = 0;
+																					
+																		            if (pNumHandle != null) {
+																		            	pNumHLength = pNumHandle.length;
+																		            }
 																					
 																					boolean foundPNum = false;
 																					
-																					for (int j = 0; j < pNumHandle.length; j++) {
+																					for (int j = 0; j < pNumHLength; j++) {
 																						
 																						if(pNumHandle[j].equals(String.valueOf(userPNumInput))) {
 																							foundPNum = true;
@@ -385,21 +440,30 @@ public class ConnectExample{
 																					if(!foundPNum) {
 																						ridBelongsCounter++;
 																					}
+																					
+																					else {
+																						foundReservation = true;
+																					}
 																				}
 																				
 																				String ridValid = ridBelongs[ridBelongsCounter];
 																				
 																				String[] rNumBelongs = connectAndExecute("SELECT", "room_number Belongs rid " + ridValid, "int");
-																				int rNumLength = rNumBelongs.length;
 																				
-																				connectAndExecute("DELETE", "Belongs room_number" + roomEntered + " rid " + ridValid, null);
+																				int rNumLength = 0;
+																				
+																	            if (rNumBelongs != null) {
+																	            	rNumLength = rNumBelongs.length;
+																	            }
+																				
+																				connectAndExecute("DELETE", "Belongs%room_number = " + roomEntered + "%rid = " + ridValid, null);
 																				
 																				roomsCheckedOut += 1;
 																				
 																				if (rNumLength == 1) {
-																					connectAndExecute("DELETE", "Handle rid " + ridValid, null);
-																					connectAndExecute("DELETE", "Reservation rid " + ridValid, null);
 																					
+																					connectAndExecute("DELETE", "Handle%rid = " + ridValid, null);
+																					connectAndExecute("DELETE", "Reservation%rid = " + ridValid, null);
 																				}
 																			}
 																			
@@ -444,19 +508,22 @@ public class ConnectExample{
 											}
 											
 											else {
-												System.out.println("Please enter either a valid phone number, or 'back':");
+												System.out.println("Please enter either a valid phone number, or 'back'.");
+												System.out.println("Enter it in the format '5201234567'");
 											}
 										}
 										
 								        catch (NumberFormatException e)  {
-								            System.out.println("Please enter either a valid phone number, or 'back':"); 
+								            System.out.println("Please enter either a valid phone number, or 'back'.");
+											System.out.println("Enter it in the format '5201234567'");
 								        } 
 									}
 								}
 								
 						        else{
 						        	sc.nextLine();
-						        	System.out.println("Please enter either a valid phone number, or 'back':");
+						        	System.out.println("Please enter either a valid phone number, or 'back'.");
+									System.out.println("Enter it in the format '5201234567'");
 						        }
 								
 							}
@@ -492,7 +559,7 @@ public class ConnectExample{
 		System.out.println("You have chosen to make a reservation.");
 		System.out.println("First, I need your employee id (eid).");
 		System.out.println("If you are not sure, type 'back' to return to the main menu,");
-		System.out.println("and select 3) View Employee ids, to find a list of eids.");
+		System.out.println("and select 3) View employee ids, to find a list of eids.");
 		System.out.println("Note, you must enter a Receptionist eid to check in/out a customer.");
 		System.out.println("Enter your eid below:");
 		
@@ -500,9 +567,9 @@ public class ConnectExample{
 		
 		while(continueLoop3) {
 		
-			if(sc.hasNext()) {
+			if(sc.hasNextLine()) {
 				
-				String userInput = sc.next();
+				String userInput = sc.nextLine();
 				
 				if (userInput.equals("back")) {
 					continueLoop3 = false;
@@ -518,10 +585,20 @@ public class ConnectExample{
 			            userEIDInput = validInt; 
 			            
 						String[] eidEmployee = connectAndExecute("SELECT", "eid Employee", "int");
-						int eidELength = eidEmployee.length;
+						
+						int eidELength = 0;
+						
+						if (eidEmployee != null) {
+							eidELength = eidEmployee.length;
+						}
 						
 						String[] eidReceptionist = connectAndExecute("SELECT", "eid Receptionist", "int");
-						int eidRLength = eidReceptionist.length;
+						
+						int eidRLength = 0;
+						
+						if (eidReceptionist != null) {
+							eidRLength = eidReceptionist.length;
+						}
 						
 						boolean eidETruth = false;
 						boolean eidRTruth = false;
@@ -544,15 +621,16 @@ public class ConnectExample{
 							
 							System.out.println("You entered a valid Receptionist eid.");
 							System.out.println("Now, please enter the customer's phone number,");
-							System.out.println("or type 'back' to return to the main menu:");
+							System.out.println("or type 'back' to return to the main menu.");
+							System.out.println("Enter it in the format '5201234567'");
 		
 							boolean continueLoop4 = true;
 							
 							while (continueLoop4) {
 								
-								if(sc.hasNext()) {
+								if(sc.hasNextLine()) {
 									
-									userInput = sc.next();
+									userInput = sc.nextLine();
 									
 									if (userInput.equals("back")) {
 										continueLoop4 = false;
@@ -560,15 +638,20 @@ public class ConnectExample{
 									
 									else {
 										
-										int userPNumInput = -1;
+										long userPNumInput = -1;
 										
 										try {
 											
-								            validInt = Integer.parseInt(userInput); 
-								            userPNumInput = validInt; 
+								            long validLong = Long.parseLong(userInput); 
+								            userPNumInput = validLong; 
 								            
-								            String[] pNumCustomer = connectAndExecute("SELECT", "phone_number Customer", "int");
-								            int pNumCLength = pNumCustomer.length;
+								            String[] pNumCustomer = connectAndExecute("SELECT", "phone_number Customer", "long");
+								            
+								            int pNumCLength = 0;
+								            
+								            if (pNumCustomer != null) {
+								            	pNumCLength = pNumCustomer.length;
+								            }
 								            
 								            boolean customerFound = false;
 								            
@@ -593,18 +676,28 @@ public class ConnectExample{
 												
 												while (continueLoop5) {
 													
-													if(sc.hasNext()) {
+													if(sc.hasNextLine()) {
 														
-														userInput = sc.next();
-														
-														continueLoop5 = false;
+														userInput = sc.nextLine();
 														
 														if (userInput.equals("NULL")) {
 															System.out.println("Please enter a valid name:");
 														}
 														
 														else {
-															customerName = userInput;
+														
+															String[] splitName = userInput.split(" ", 0);
+															
+															for(int i = 0; i < splitName.length; i++) {
+																
+																customerName += splitName[i];
+																
+																if (i != (splitName.length - 1)){
+																	customerName += "_";
+																}
+															}
+															
+															continueLoop5 = false;
 														}
 													}
 														
@@ -615,34 +708,34 @@ public class ConnectExample{
 												}
 												
 								            	System.out.println("Finally, what is the customer's email.");
-								            	System.out.println("Please enter your response:");
+								            	System.out.println("Please enter your response similar to 'abc@address.ext.com':");
 												
 												boolean continueLoop6 = true;
 												
 												while (continueLoop6) {
 													
-													if(sc.hasNext()) {
+													if(sc.hasNextLine()) {
 														
-														userInput = sc.next();
-														
-														continueLoop6 = false;
+														userInput = sc.nextLine();
 														
 														if (userInput.equals("NULL")) {
-															System.out.println("Please enter a valid email:");
+															System.out.println("Please enter a valid email similar to 'abc@address.ext.com':");
 														}
 														
 														else {
+															
 															customerEmail = userInput;
+															continueLoop6 = false;
 														}
 													}
 														
 											        else{
 											        	sc.nextLine();
-											        	System.out.println("Please enter a valid email:");
+											        	System.out.println("Please enter a valid email similar to 'abc@address.ext.com':");
 											        }
 												}
 												
-												connectAndExecute("INSERT", "Customer " + String.valueOf(userPNumInput) + " " + customerName + " " + customerEmail, null);
+												connectAndExecute("INSERT", "Customer%" + String.valueOf(userPNumInput) + ", '" + customerName + "', '" + customerEmail + "'", null);
 								            }
 								            
 								            System.out.println("What day would you like to arrive?");
@@ -657,9 +750,9 @@ public class ConnectExample{
 											
 											while (continueLoop7) {
 												
-												if(sc.hasNext()) {
+												if(sc.hasNextLine()) {
 													
-													userInput = sc.next();
+													userInput = sc.nextLine();
 													validDate1 = userInput;
 													
 													if (userInput.equals("back")) {
@@ -730,16 +823,16 @@ public class ConnectExample{
 								            System.out.println("What day would you like to leave?");
 								            System.out.println("Enter the date in the format 'YYYY-MM-DD',");
 								            System.out.println("or enter 'back' to exit this reservation.");
-								            System.out.println("The date must be on '2020-05-02' or later:");
+								            System.out.println("The date must be after " + validDate1 + ":");
 											
 											boolean continueLoop8 = true;
 											String validDate2 = "";
 											
 											while (continueLoop8) {
 												
-												if(sc.hasNext()) {
+												if(sc.hasNextLine()) {
 													
-													userInput = sc.next();
+													userInput = sc.nextLine();
 													validDate2 = userInput;
 													
 													if (userInput.equals("back")) {
@@ -822,6 +915,12 @@ public class ConnectExample{
 											}
 											
 								            String[] rNumsRoom = connectAndExecute("SELECT", "room_number Room", "int");
+								            
+								            int rNumsRLength = 0;
+								            
+								            if (rNumsRoom != null) {
+								            	rNumsRLength = rNumsRoom.length;
+								            }
 											
 											String inputString = "rid Belongs room_number ";
 											
@@ -832,17 +931,23 @@ public class ConnectExample{
 											
 											double price = 0.0;
 											
-											connectAndExecute("INSERT", "Reservation " + String.valueOf(rid) + " " + validDate1 + " " + validDate2 + " " + "9999.99", null);
+											connectAndExecute("INSERT", "Reservation%" + String.valueOf(rid) + ", '" + validDate1 + "', '" + validDate2 + "', " + "9999.99", null);
 											
-											for (int i = 0; i < rNumsRoom.length; i++) {
+											for (int i = 0; i < rNumsRLength; i++) {
 												
 												String selectString = inputString + rNumsRoom[i];
 												
 												String[] ridBelongs = connectAndExecute("SELECT", selectString, "int");
 												
+												int ridBLength = 0;
+												
+												if (ridBelongs != null) {
+													ridBLength = ridBelongs.length;
+												}
+												
 												boolean rNumValid = true;
 												
-												for (int j = 0; j < ridBelongs.length; j++) {
+												for (int j = 0; j < ridBLength; j++) {
 													
 													String startDate = connectAndExecute("SELECT", "start_date Reservation rid " + ridBelongs[j], "date")[0];
 													String endDate = connectAndExecute("SELECT", "end_date Reservation rid " + ridBelongs[j], "date")[0];
@@ -857,7 +962,6 @@ public class ConnectExample{
 														if(((given1D.compareTo(endD) < 0) && (given1D.compareTo(startD) > 0)) || ((given2D.compareTo(endD) < 0) && (given2D.compareTo(startD) > 0))) {
 													         rNumValid = false;
 														}
-														
 													} 
 													
 													catch (ParseException e) {
@@ -869,7 +973,7 @@ public class ConnectExample{
 												
 												if (rNumValid) {
 													
-													System.out.println("Room with rid (room id) " + rNumsRoom[i] + " is available for the dates you requested.");
+													System.out.println("Room number " + rNumsRoom[i] + " is available for the dates you requested.");
 													System.out.println("This room is a " + roomType[0] + " type room, all rooms have 2 beds.");
 													System.out.println("Would you like to reserve this room?");
 													System.out.println("Enter 'yes' to reserve this room, enter 'no',");
@@ -879,13 +983,11 @@ public class ConnectExample{
 													
 													while (continueLoop9) {
 														
-														if(sc.hasNext()) {
+														if(sc.hasNextLine()) {
 															
-															userInput = sc.next();
+															userInput = sc.nextLine();
 															
 															if (userInput.equals("yes")) {
-																
-																continueLoop9 = false;
 																
 																String[] arrOfInput1 = validDate1.split("-", 0);
 																String[] arrOfInput2 = validDate2.split("-", 0);
@@ -908,16 +1010,16 @@ public class ConnectExample{
 																	price = price + (totalDays * 500.0);
 																}
 																
-																connectAndExecute("INSERT", "Belongs " + String.valueOf(rid) + " " + String.valueOf(rNumsRoom[i]), null);
+																connectAndExecute("INSERT", "Belongs%" + String.valueOf(rid) + ", " + String.valueOf(rNumsRoom[i]), null);
 																
 																continueLoop9 = false;
 															}
 															
-															if (userInput.equals("no")) {
+															else if (userInput.equals("no")) {
 																continueLoop9 = false;
 															}
 															
-															if (userInput.equals("done")) {
+															else if (userInput.equals("done")) {
 																continueLoop9 = false;
 																i = 100000;
 															}
@@ -935,19 +1037,25 @@ public class ConnectExample{
 												}	
 											}
 											
-											connectAndExecute("UPDATE", "Reservation price_amount " + String.valueOf(price) + " rid " + String.valueOf(rid), null);
-											connectAndExecute("INSERT", "Handle " + String.valueOf(rid) + " " + String.valueOf(userEIDInput) + " " + String.valueOf(userPNumInput), null);
+											connectAndExecute("UPDATE", "Reservation%price_amount = " + String.valueOf(price) + "%rid = " + String.valueOf(rid), null);
+											connectAndExecute("INSERT", "Handle%" + String.valueOf(rid) + ", " + String.valueOf(userEIDInput) + ", " + String.valueOf(userPNumInput), null);
+										
+											System.out.println("Your reservation is complete, the total cost is: $" + String.valueOf(price));
+											System.out.println("Payment is completed at check-in,");
+											System.out.println("or by an email which is automatically sent to your email.");
 										}
 										
 								        catch (NumberFormatException e)  {
-								            System.out.println("Please enter either a valid phone number, or 'back':"); 
+								            System.out.println("Please enter either a valid phone number, or 'back'."); 
+											System.out.println("Enter it in the format '5201234567'");
 								        } 
 									}    
 								}
 								
 						        else{
 						        	sc.nextLine();
-						        	System.out.println("Please enter either a valid phone number, or 'back':");
+						        	System.out.println("Please enter either a valid phone number, or 'back'.");
+									System.out.println("Enter it in the format '5201234567'");
 						        }
 							}	            
 						}
@@ -979,8 +1087,106 @@ public class ConnectExample{
 	
 	public static void viewEmployeeIds(Scanner sc) {
 		
+		boolean continueLoop2 = true;
 		
+		System.out.println("You are trying to view employee ids.");
+		System.out.println("Select one of the following options.");
+		System.out.println("---------------------------");
+		System.out.println("Press 1-5 to continue:");
+		System.out.println("---------------------------");
+		System.out.println("1) View all Employees.");
+		System.out.println("2) View all Receptionist ids.");
+		System.out.println("3) View all Restaurant Manager ids.");
+		System.out.println("4) View all Housekeeper ids.");
+		System.out.println("5) Back to main menu.");
+		System.out.println("---------------------------");
 		
+		while(continueLoop2) {
+		        
+	        if(sc.hasNextInt()){
+	        	
+	            int userInput = sc.nextInt();
+	            sc.nextLine();
+	            
+	            if((userInput >= 1) && (userInput <= 5)) {
+	            	
+	            	continueLoop2 = false;
+	            	
+	            	if(userInput == 1){
+	            		
+				    	String[] eidEmployees = connectAndExecute("SELECT", "eid Employee", "int");
+				    	
+				    	System.out.println("Here is a list of Employee ids:");
+				    	System.out.println("-------------------------------");
+				    	System.out.println("eid");
+				    	System.out.println("-------------------------------");
+				    	
+				    	for (int i = 0; i < eidEmployees.length; i++) {
+				    		System.out.println(eidEmployees[i]);
+				    	}
+				    	
+				    	System.out.println("-------------------------------");
+				    }
+				    
+				    else if(userInput == 2){
+				    	
+				    	String[] eidReceptionist = connectAndExecute("SELECT", "eid Receptionist", "int");
+				    	
+				    	System.out.println("Here is a list of Receptionist ids:");
+				    	System.out.println("-----------------------------------");
+				    	System.out.println("eid");
+				    	System.out.println("-----------------------------------");
+				    	
+				    	for (int i = 0; i < eidReceptionist.length; i++) {
+				    		System.out.println(eidReceptionist[i]);
+				    	}
+				    	
+				    	System.out.println("-----------------------------------");
+				    }
+				    
+				    else if(userInput == 3){
+				    	
+				    	String[] eidRM = connectAndExecute("SELECT", "eid RestaurantManager", "int");
+				    	
+				    	System.out.println("Here is a list of Restaurant Manager ids:");
+				    	System.out.println("-----------------------------------------");
+				    	System.out.println("eid");
+				    	System.out.println("-----------------------------------------");
+				    	
+				    	for (int i = 0; i < eidRM.length; i++) {
+				    		System.out.println(eidRM[i]);
+				    	}
+				    	
+				    	System.out.println("-----------------------------------------");
+				    }
+				    
+				    else if(userInput == 4){
+				    	
+				    	String[] eidHousekeeper = connectAndExecute("SELECT", "eid Housekeeper", "int");
+				    	
+				    	System.out.println("Here is a list of Housekeeper ids:");
+				    	System.out.println("-----------------------------------------");
+				    	System.out.println("eid");
+				    	System.out.println("-----------------------------------------");
+				    	
+				    	for (int i = 0; i < eidHousekeeper.length; i++) {
+				    		System.out.println(eidHousekeeper[i]);
+				    	}
+				    	
+				    	System.out.println("-----------------------------------------");
+				    }
+	            }
+	            
+	            else {
+	            	System.out.println("Enter a valid Integer value: 1-5");
+	            }
+	        }
+	        
+	        else{
+	        	sc.nextLine();
+	        	System.out.println("Enter a valid Integer value, 1-5:");
+	        }
+		}
 	}
 	
 	public static void browseCustomerReviews(Scanner sc) {
@@ -989,7 +1195,7 @@ public class ConnectExample{
 		
 	}
 	
-	public static void procedure(Scanner sc) {
+	public static void searchAvailableRooms(Scanner sc) {
 		
 		
 		
@@ -1067,25 +1273,10 @@ public class ConnectExample{
 		
 		try {
 			
-			String[] arrOfStr = arguments.split(" ", 0);
-			
-			String insertString = "";
-			
-			for (int i = 1; i < arrOfStr.length; i++) {
-				
-				insertString = insertString + arrOfStr[i];
-				
-				if (i == (arrOfStr.length - 1)) {
-					insertString += ")";
-				}
-				
-				else {
-					insertString += ", ";
-				}
-			}
+			String[] arrOfStr = arguments.split("%", 0);
 			
 			Statement stmtInsert = conn.createStatement();
-			stmtInsert.executeUpdate("INSERT INTO " + arrOfStr[0] + " VALUES(" + insertString);
+			stmtInsert.executeUpdate("INSERT INTO " + arrOfStr[0] + " VALUES(" + arrOfStr[1] + ")");
 			
 			stmtInsert.close();
 		}
@@ -1103,18 +1294,18 @@ public class ConnectExample{
 		
 		try {
 			
-			String[] arrOfStr = arguments.split(" ", 0);
+			String[] arrOfStr = arguments.split("%", 0);
 			
 			Statement stmtDelete = conn.createStatement();
 			
-			String executeString = "DELETE FROM " + arrOfStr[0] + " WHERE " + arrOfStr[1] + " = " + arrOfStr[2];
+			String executeString = "DELETE FROM " + arrOfStr[0] + " WHERE " + arrOfStr[1];
 			
-			int stringAttachments = (arrOfStr.length - 3) / 2;
+			int stringAttachments = arrOfStr.length - 2;
 			int stringAttachmentCounter = 0;
 			
 			while (stringAttachments != stringAttachmentCounter) {
 				
-				executeString = executeString + " AND " + arrOfStr[3 + (2 * stringAttachmentCounter)] + " = " + arrOfStr[4 + (2 * stringAttachmentCounter)];
+				executeString = executeString + " AND " + arrOfStr[stringAttachmentCounter + 2];
 				stringAttachmentCounter += 1;
 			}
 			
@@ -1135,10 +1326,10 @@ public class ConnectExample{
 		
 		try {
 			
-			String[] arrOfStr = arguments.split(" ", 0);
+			String[] arrOfStr = arguments.split("%", 0);
 			
 			Statement stmtUpdate = conn.createStatement();
-			stmtUpdate.executeUpdate("UPDATE " + arrOfStr[0] + " SET " + arrOfStr[1] + " = " + arrOfStr[2] + " WHERE " + arrOfStr[3] + " = " + arrOfStr[4]);
+			stmtUpdate.executeUpdate("UPDATE " + arrOfStr[0] + " SET " + arrOfStr[1] + " WHERE " + arrOfStr[2]);
 			
 			stmtUpdate.close();
 		}
@@ -1158,7 +1349,7 @@ public class ConnectExample{
 			
 			String[] arrOfStr = arguments.split(" ", 0);
 			
-			if (selectType.equals("int")) {
+			if (selectType.equals("int") || selectType.equals("long")) {
 				
 				if (arrOfStr.length == 2) {
 					
@@ -1179,7 +1370,15 @@ public class ConnectExample{
 					int rsCounter = 0;
 					
 					while(rsSelect.next()){
-						returnedValues[rsCounter] = String.valueOf(rsSelect.getInt(1));
+						
+						if (selectType.equals("int")){
+							returnedValues[rsCounter] = String.valueOf(rsSelect.getInt(1));
+						}
+						
+						else {
+							returnedValues[rsCounter] = String.valueOf(rsSelect.getLong(1));
+						}
+						
 						rsCounter++;
 					}
 					
@@ -1200,8 +1399,25 @@ public class ConnectExample{
 					
 					for(int i = 3; i < arrOfStr.length; i++) {
 						
-						prepareCount.setString(1, arrOfStr[i]);
-						rsCount = prepareSelect.executeQuery();
+				        try {
+				        	
+				            long validLong = Long.parseLong(arrOfStr[i]);
+							
+				            if (validLong <= ((long) Integer.MAX_VALUE)) {
+				            	prepareCount.setInt(1, (int) validLong);
+				            }
+				            
+				            else {
+				            	prepareCount.setLong(1, validLong);
+				            }
+				        }
+				        
+				        catch (NumberFormatException e)  {
+				            System.out.println("Please enter either a valid eid, or 'back':");
+							prepareCount.setString(1, arrOfStr[i]);
+				        } 
+				        
+						rsCount = prepareCount.executeQuery();
 						
 						int selectLength = 0;
 						
@@ -1210,7 +1426,7 @@ public class ConnectExample{
 						}
 						
 						totalCount += selectLength;
-						
+				        
 					}
 					
 					String[] returnedValues = new String[totalCount];
@@ -1221,11 +1437,36 @@ public class ConnectExample{
 					
 					for(int i = 3; i < arrOfStr.length; i++) {
 						
-						prepareSelect.setString(1, arrOfStr[i]);
+				        try {
+				        	
+				            long validLong = Long.parseLong(arrOfStr[i]);
+							
+				            if (validLong <= ((long) Integer.MAX_VALUE)) {
+				            	prepareSelect.setInt(1, (int) validLong);
+				            }
+				            
+				            else {
+				            	prepareSelect.setLong(1, validLong);
+				            }
+				        }
+				        
+				        catch (NumberFormatException e)  {
+				            System.out.println("Please enter either a valid eid, or 'back':");
+							prepareSelect.setString(1, arrOfStr[i]);
+				        }
+				        
 						rsSelect = prepareSelect.executeQuery();
 						
 						while(rsSelect.next()){
-							returnedValues[rsCounter] = String.valueOf(rsSelect.getInt(1));
+							
+							if(selectType.equals("int")) {
+								returnedValues[rsCounter] = String.valueOf(rsSelect.getInt(1));
+							}
+							
+							else {
+								returnedValues[rsCounter] = String.valueOf(rsSelect.getLong(1));
+							}
+							
 							rsCounter++;
 						}
 						
